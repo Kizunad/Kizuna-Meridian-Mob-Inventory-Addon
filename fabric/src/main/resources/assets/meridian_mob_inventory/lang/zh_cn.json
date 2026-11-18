@@ -1,0 +1,10 @@
+{
+  "command.meridian_mob_inventory.list": "%s 的背囊：",
+  "command.meridian_mob_inventory.empty": "%s 的背囊是空的",
+  "command.meridian_mob_inventory.slot": "  %s第 %s 格（槽 %s）：%s ×%s",
+  "command.meridian_mob_inventory.row.hand": "手边",
+  "command.meridian_mob_inventory.row.pocket": "口袋",
+  "command.meridian_mob_inventory.clear": "已清空 %s 的背囊，移走 %s 件",
+  "command.meridian_mob_inventory.unsupported": "%s 没有背囊",
+  "command.meridian_mob_inventory.damaged": "背囊的存档坏了，已停用：%s"
+}

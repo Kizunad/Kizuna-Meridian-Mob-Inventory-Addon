@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "meridian_mob_inventory_test",
+  "version": "0.1.0-SNAPSHOT",
+  "environment": "*",
+  "entrypoints": {"fabric-gametest": [
+    "dev.kizuna.meridian.inventory.InventoryGameTest",
+    "dev.kizuna.meridian.inventory.InventoryDamageGameTest",
+    "dev.kizuna.meridian.inventory.InventoryLifecycleGameTest",
+    "dev.kizuna.meridian.inventory.InventoryCommandsGameTest"
+  ]},
+  "mixins": ["meridian_mob_inventory_test.mixins.json"],
+  "depends": {"meridian_mob_inventory": "*"}
+}

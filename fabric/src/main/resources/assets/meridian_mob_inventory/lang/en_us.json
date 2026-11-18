@@ -1,0 +1,10 @@
+{
+  "command.meridian_mob_inventory.list": "%s is carrying:",
+  "command.meridian_mob_inventory.empty": "%s is carrying nothing",
+  "command.meridian_mob_inventory.slot": "  %s %s (slot %s): %s ×%s",
+  "command.meridian_mob_inventory.row.hand": "At hand",
+  "command.meridian_mob_inventory.row.pocket": "Pocket",
+  "command.meridian_mob_inventory.clear": "Emptied %s's pack, %s items removed",
+  "command.meridian_mob_inventory.unsupported": "%s has no pack",
+  "command.meridian_mob_inventory.damaged": "Saved pack data is damaged and disabled: %s"
+}

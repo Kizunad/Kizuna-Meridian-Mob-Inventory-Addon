@@ -1,0 +1,22 @@
+pluginManagement {
+    repositories {
+        maven { url = 'https://maven.fabricmc.net/' }
+        gradlePluginPortal()
+        mavenCentral()
+    }
+}
+
+// 相邻仓目录、产物与第三方版本由 Framework 的工作区维护。
+apply from: new File(rootDir.parentFile, 'Kizuna-Meridian-Mod-Framework/scripts/workspace.gradle')
+rootProject.name = 'kizuna-meridian-mob-inventory-addon'
+include 'fabric'
+
+kizunaWorkspace.includeSource('framework', [
+    client: ['local.meridian:client', 'dev.kizuna.meridian:client'],
+    server: ['local.meridian:server', 'dev.kizuna.meridian:server'],
+    fabric: 'dev.kizuna.meridian:fabric'
+])
+kizunaWorkspace.includeSource('bs3d-weights', [
+    server: 'dev.kizuna.bs3d.weights:server',
+    client: 'dev.kizuna.bs3d.weights:client'
+])

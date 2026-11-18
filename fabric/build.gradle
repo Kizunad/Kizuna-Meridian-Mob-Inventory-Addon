@@ -1,0 +1,64 @@
+plugins { id 'net.fabricmc.fabric-loom' }
+
+description = '生物背囊：固定槽位库存、存档、生命周期和管理命令。'
+
+dependencies {
+    minecraft libs.minecraft
+    implementation libs.fabric.loader
+    implementation libs.fabric.api
+    implementation('dev.kizuna.meridian:fabric') { transitive = false }
+    implementation('dev.kizuna.bs3d.weights:server') { transitive = false }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+
+apply from: new File(kizunaWorkspace.directory('framework'), 'scripts/full-assembly.gradle')
+dependencies {
+    localRuntime('local.meridian:server') { transitive = false }
+    localRuntime libs.protobuf.java
+}
+
+sourceSets {
+    gametest {
+        compileClasspath += sourceSets.main.compileClasspath + sourceSets.main.output
+        runtimeClasspath += sourceSets.main.runtimeClasspath + sourceSets.main.output
+    }
+}
+
+loom {
+    mods {
+        meridian_mob_inventory { sourceSet sourceSets.main }
+        meridian_mob_inventory_test { sourceSet sourceSets.gametest }
+    }
+    runs {
+        gametest {
+            server()
+            name '生物背囊 GameTest'
+            source sourceSets.gametest
+            runDir providers.gradleProperty('gametestRunDir').getOrElse('build/gametest')
+            vmArg '-Dfabric-api.gametest'
+            vmArg '-Dfabric-api.gametest.report-file=build/gametest-results.xml'
+        }
+    }
+}
+
+tasks.named('runGametest') {
+    doFirst {
+        // 每次使用独立目录，保留已运行世界作为存档证据。
+        def directory = file(providers.gradleProperty('gametestRunDir').getOrElse('build/gametest'))
+        if (new File(directory, 'world').exists()) {
+            throw new GradleException('运行目录已有世界，请指定新的 gametestRunDir')
+        }
+        directory.mkdirs()
+        new File(directory, 'server.properties').text = '''online-mode=false
+server-ip=127.0.0.1
+server-port=0
+generate-structures=false
+view-distance=2
+simulation-distance=2
+'''
+    }
+}

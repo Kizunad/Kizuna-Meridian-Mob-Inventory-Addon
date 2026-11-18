@@ -1,0 +1,7 @@
+[
+  {"items": ["minecraft:bone"], "limit": 24},
+  {"items": ["minecraft:tipped_arrow", "minecraft:spectral_arrow"], "limit": 128},
+  {"items": ["minecraft:bow"], "limit": 1},
+  {"items": ["#minecraft:swords", "#minecraft:axes"], "limit": 1},
+  {"items": ["minecraft:totem_of_undying"], "limit": 1}
+]

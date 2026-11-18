@@ -1,0 +1,7 @@
+# 装备使用小数系数以验证先按来源汇总、再舍入到克。
+hotbar = 0
+main = 2
+armor = 0.005
+offhand = 1
+cursor = 1
+worn_containers = 1

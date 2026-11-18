@@ -43,17 +43,23 @@ public final class MobInventory {
         // 先补同组件的现有栈，再占空槽；每次成功插入同时从来源扣减。
         Objects.requireNonNull(source, "插入来源不能为空");
         int originalCount = source.getCount();
-        for (int slot = 0; slot < SIZE && !source.isEmpty(); slot++) {
+        fillRow(0, source);
+        fillRow(ROW_SIZE, source);
+        return originalCount - source.getCount();
+    }
+
+    private void fillRow(int first, ItemStack source) {
+        int end = first + ROW_SIZE;
+        for (int slot = first; slot < end && !source.isEmpty(); slot++) {
             if (!slots.get(slot).isEmpty()) {
                 insertAt(slot, source);
             }
         }
-        for (int slot = 0; slot < SIZE && !source.isEmpty(); slot++) {
+        for (int slot = first; slot < end && !source.isEmpty(); slot++) {
             if (slots.get(slot).isEmpty()) {
                 insertAt(slot, source);
             }
         }
-        return originalCount - source.getCount();
     }
 
     public int insertAt(int slot, ItemStack source) {

@@ -2,6 +2,6 @@
   "required": true,
   "package": "dev.kizuna.meridian.inventory.test",
   "compatibilityLevel": "JAVA_25",
-  "mixins": ["DeathLootInvoker"],
+  "mixins": ["DeathLootInvoker", "TargetGoalsAccess"],
   "injectors": {"defaultRequire": 1}
 }

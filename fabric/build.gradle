@@ -6,6 +6,7 @@ dependencies {
     minecraft libs.minecraft
     implementation libs.fabric.loader
     implementation libs.fabric.api
+    compileOnly libs.protobuf.java
     implementation('dev.kizuna.meridian:fabric') { transitive = false }
     implementation('dev.kizuna.bs3d.weights:server') { transitive = false }
 }
@@ -53,6 +54,10 @@ tasks.named('runGametest') {
             throw new GradleException('运行目录已有世界，请指定新的 gametestRunDir')
         }
         directory.mkdirs()
+        project.copy {
+            from 'src/gametest/config/burden.toml'
+            into new File(directory, 'config/bs3d_weights')
+        }
         new File(directory, 'server.properties').text = '''online-mode=false
 server-ip=127.0.0.1
 server-port=0

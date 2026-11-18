@@ -7,7 +7,10 @@
     "dev.kizuna.meridian.inventory.InventoryGameTest",
     "dev.kizuna.meridian.inventory.InventoryDamageGameTest",
     "dev.kizuna.meridian.inventory.InventoryLifecycleGameTest",
-    "dev.kizuna.meridian.inventory.InventoryCommandsGameTest"
+    "dev.kizuna.meridian.inventory.InventoryCommandsGameTest",
+    "dev.kizuna.meridian.inventory.PickupGameTest",
+    "dev.kizuna.meridian.inventory.BurdenGameTest",
+    "dev.kizuna.meridian.inventory.PlayerDropGameTest"
   ]},
   "mixins": ["meridian_mob_inventory_test.mixins.json"],
   "depends": {"meridian_mob_inventory": "*"}

@@ -20,6 +20,33 @@ public final class InventoryState {
     private InventoryStorage.Phase phase = InventoryStorage.Phase.NEW;
     private Dynamic<?> damagedData;
     private String diagnostic;
+    private boolean invalidWeightReported;
+
+    boolean available() {
+        return damagedData == null && phase == InventoryStorage.Phase.READY;
+    }
+
+    void reportInvalidWeight(Mob mob) {
+        if (!invalidWeightReported) {
+            LOGGER.warn("背囊重量无效，实体 {} 暂停拾取并减速", mob.getUUID());
+            invalidWeightReported = true;
+        }
+    }
+
+    void clearWeightDiagnostic() {
+        invalidWeightReported = false;
+    }
+
+    void spillOnConversion(Mob mob, ServerLevel level) {
+        if (available()) {
+            for (int slot = 0; slot < MobInventory.SIZE; slot++) {
+                ItemStack stack = inventory.extract(slot, Integer.MAX_VALUE);
+                if (!stack.isEmpty()) {
+                    mob.spawnAtLocation(level, stack);
+                }
+            }
+        }
+    }
 
     public MobInventory inventory() {
         // 损坏不能伪装成一个空背囊交给调用者继续写。

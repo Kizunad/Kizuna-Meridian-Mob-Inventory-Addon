@@ -1,0 +1,4 @@
+[
+  {"items": ["#minecraft:stone_crafting_materials", "minecraft:cobblestone"], "limit": 3},
+  {"items": ["minecraft:cobblestone", "minecraft:bone"], "limit": 12}
+]

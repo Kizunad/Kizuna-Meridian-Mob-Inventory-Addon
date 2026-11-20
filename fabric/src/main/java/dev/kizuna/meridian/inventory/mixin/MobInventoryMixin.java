@@ -24,7 +24,7 @@ public abstract class MobInventoryMixin implements InventoryHolder {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void meridian$addPickupGoal(CallbackInfo callback) {
         Mob mob = (Mob) (Object) this;
-        if (MobInventories.supports(mob) && mob.level() instanceof ServerLevel level) {
+        if (MobInventories.usesSkeletonSupplies(mob) && mob.level() instanceof ServerLevel level) {
             mob.getGoalSelector().addGoal(PickupGoal.PRIORITY, new PickupGoal(level, mob));
         }
     }
@@ -32,7 +32,7 @@ public abstract class MobInventoryMixin implements InventoryHolder {
     @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Mob;canPickUpLoot()Z"))
     private boolean meridian$vanillaLooting(boolean vanilla) {
-        return vanilla && !MobInventories.supports((Mob) (Object) this);
+        return vanilla && !MobInventories.usesSkeletonSupplies((Mob) (Object) this);
     }
 
     @Inject(method = "tick", at = @At("TAIL"))

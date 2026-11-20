@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ItemStackWithSlot;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.ValueInput;
@@ -22,7 +23,7 @@ public final class InventoryState {
     private String diagnostic;
     private boolean invalidWeightReported;
 
-    boolean available() {
+    public boolean available() {
         return damagedData == null && phase == InventoryStorage.Phase.READY;
     }
 
@@ -93,7 +94,8 @@ public final class InventoryState {
             output.store(InventoryStorage.KEY, Codec.PASSTHROUGH, damagedData);
             return;
         }
-        var saved = new InventoryStorage.Saved(InventoryStorage.VERSION, phase, InventoryStorage.entries(inventory));
+        var saved = new InventoryStorage.Saved(InventoryStorage.VERSION, phase, InventoryStorage.entries(inventory),
+                inventory.birthWeaponSlot());
         output.store(InventoryStorage.KEY, InventoryStorage.CODEC, saved);
     }
 
@@ -112,12 +114,22 @@ public final class InventoryState {
         phase = InventoryStorage.Phase.READY;
     }
 
-    public void dropOnDeath(Mob mob, ServerLevel level) {
+    void openEmptyPack() {
+        if (damagedData == null && phase == InventoryStorage.Phase.NEW) {
+            phase = InventoryStorage.Phase.READY;
+        }
+    }
+
+    public void dropOnDeath(Mob mob, ServerLevel level, Optional<DamageSource> equipmentLoot) {
         // 死亡结算先标记，再逐槽清空；卸载路径不调用这里。
         if (damagedData != null || phase == InventoryStorage.Phase.DEAD) {
             return;
         }
         phase = InventoryStorage.Phase.DEAD;
+        inventory.birthWeaponSlot().ifPresent(slot -> {
+            ItemStack weapon = inventory.extract(slot, 1);
+            equipmentLoot.ifPresent(source -> InventoryDrops.dropAsMainHand(level, mob, source, weapon));
+        });
         for (int slot = 0; slot < MobInventory.SIZE; slot++) {
             ItemStack stack = inventory.extract(slot, Integer.MAX_VALUE);
             if (InventoryDrops.shouldDrop(level, stack)) {

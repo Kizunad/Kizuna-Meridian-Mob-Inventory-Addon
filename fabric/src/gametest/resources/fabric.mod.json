@@ -5,6 +5,7 @@
   "environment": "*",
   "entrypoints": {"fabric-gametest": [
     "dev.kizuna.meridian.inventory.InventoryGameTest",
+    "dev.kizuna.meridian.inventory.HumanoidInventoryGameTest",
     "dev.kizuna.meridian.inventory.InventoryDamageGameTest",
     "dev.kizuna.meridian.inventory.InventoryLifecycleGameTest",
     "dev.kizuna.meridian.inventory.InventoryCommandsGameTest",

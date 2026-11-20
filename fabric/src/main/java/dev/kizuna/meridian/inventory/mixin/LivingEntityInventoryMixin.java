@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import dev.kizuna.meridian.inventory.GroundItemAccess;
 import dev.kizuna.meridian.inventory.MobInventories;
+import java.util.Optional;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -12,6 +13,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,6 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityInventoryMixin {
+    @Shadow protected abstract boolean shouldDropLoot(ServerLevel level);
     @Unique private boolean meridian$droppingDeathLoot;
 
     @WrapMethod(method = "dropAllDeathLoot")
@@ -51,7 +54,11 @@ public abstract class LivingEntityInventoryMixin {
     private void meridian$dropInventory(ServerLevel level, DamageSource source, CallbackInfo callback) {
         // 原版已处理装备；这里只结算额外背囊，区块卸载不经过死亡入口。
         if ((Object) this instanceof Mob mob && MobInventories.supports(mob)) {
-            MobInventories.state(mob).dropOnDeath(mob, level);
+            Optional<DamageSource> equipmentLoot = Optional.empty();
+            if (shouldDropLoot(level)) {
+                equipmentLoot = Optional.of(source);
+            }
+            MobInventories.state(mob).dropOnDeath(mob, level, equipmentLoot);
         }
     }
 }

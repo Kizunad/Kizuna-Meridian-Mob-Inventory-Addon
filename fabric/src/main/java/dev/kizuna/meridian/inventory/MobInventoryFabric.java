@@ -25,13 +25,18 @@ public final class MobInventoryFabric implements ModInitializer {
         });
         ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
             if (entity instanceof Mob mob && MobInventories.supports(mob)) {
-                MobInventories.state(mob).grantBirthItems(BIRTH_ITEMS.snapshot());
+                var state = MobInventories.state(mob);
+                if (MobInventories.usesSkeletonSupplies(mob)) {
+                    state.grantBirthItems(BIRTH_ITEMS.snapshot());
+                } else {
+                    state.openEmptyPack();
+                }
                 MobBurden.update(level, mob);
             }
         });
         InventoryCommands.register();
         ServerLivingEntityEvents.MOB_CONVERSION.register((previous, next, params) -> {
-            if (MobInventories.supports(previous) && next.getType() == EntityTypes.STRAY
+            if (MobInventories.usesSkeletonSupplies(previous) && next.getType() == EntityTypes.STRAY
                     && previous.level() instanceof ServerLevel level) {
                 MobInventories.state(previous).spillOnConversion(previous, level);
             }

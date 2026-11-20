@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.item.ItemStack;
@@ -23,12 +24,13 @@ final class InventoryStorage {
     static final Codec<Saved> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.fieldOf("version").forGetter(Saved::version),
             PHASE_CODEC.fieldOf("phase").forGetter(Saved::phase),
-            SLOT_CODEC.listOf().fieldOf("items").forGetter(Saved::items)
+            SLOT_CODEC.listOf().fieldOf("items").forGetter(Saved::items),
+            Codec.INT.optionalFieldOf("birth_weapon_slot").forGetter(Saved::birthWeapon)
     ).apply(instance, Saved::new));
 
     enum Phase { NEW, READY, DEAD }
 
-    record Saved(int version, Phase phase, List<ItemStackWithSlot> items) { }
+    record Saved(int version, Phase phase, List<ItemStackWithSlot> items, Optional<Integer> birthWeapon) { }
 
     private InventoryStorage() {
         // 编解码没有实例状态。
@@ -49,6 +51,7 @@ final class InventoryStorage {
             throw new IllegalArgumentException("未知背囊存档版本：" + saved.version());
         }
         MobInventory inventory = fromEntries(saved.items());
+        saved.birthWeapon().ifPresent(inventory::restoreBirthWeapon);
         if (saved.phase() != Phase.READY && !saved.items().isEmpty()) {
             throw new IllegalArgumentException("待出生或已死亡的背囊仍有物品");
         }

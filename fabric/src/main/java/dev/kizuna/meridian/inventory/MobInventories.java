@@ -1,18 +1,28 @@
 package dev.kizuna.meridian.inventory;
 
+import java.util.Set;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 
 /** 已登记实体的权威库存入口。 */
 public final class MobInventories {
+    private static final Set<EntityType<?>> TYPES = Set.of(EntityTypes.SKELETON, EntityTypes.VILLAGER,
+            EntityTypes.WANDERING_TRADER, EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.EVOKER,
+            EntityTypes.WITCH, EntityTypes.ILLUSIONER, EntityTypes.ZOMBIE, EntityTypes.HUSK, EntityTypes.DROWNED,
+            EntityTypes.ZOMBIE_VILLAGER);
+
     private MobInventories() {
         // 查询入口没有全局实体缓存，生命周期随实体本身。
     }
 
     public static boolean supports(Entity entity) {
-        // 使用精确类型登记，骷髅的其他变种不自动获得背囊。
+        return TYPES.contains(entity.getType());
+    }
+
+    public static boolean usesSkeletonSupplies(Entity entity) {
         return entity.getType() == EntityTypes.SKELETON;
     }
 

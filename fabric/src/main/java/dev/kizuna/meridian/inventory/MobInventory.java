@@ -3,13 +3,16 @@ package dev.kizuna.meridian.inventory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import net.minecraft.world.item.ItemStack;
 
 /** 固定两行库存；插入消耗来源，移出返回实物，查询只返回副本。仅在服务器线程使用。 */
 public final class MobInventory {
     public static final int ROW_SIZE = 9;
     public static final int SIZE = ROW_SIZE * 2;
+    private static final int NO_WEAPON = -1;
     private final List<ItemStack> slots = new ArrayList<>(SIZE);
+    private int birthWeaponSlot = NO_WEAPON;
 
     public MobInventory() {
         // 空槽也占据固定索引，不随内容压缩。
@@ -84,7 +87,11 @@ public final class MobInventory {
         if (count < 0) {
             throw new IllegalArgumentException("移出数量不能小于零");
         }
-        return stored.split(count);
+        ItemStack removed = stored.split(count);
+        if (stored.isEmpty() && birthWeaponSlot == slot) {
+            birthWeaponSlot = NO_WEAPON;
+        }
+        return removed;
     }
 
     public void swap(int first, int second) {
@@ -93,6 +100,11 @@ public final class MobInventory {
         ItemStack secondStack = slots.get(checkedSlot(second));
         slots.set(first, secondStack);
         slots.set(second, firstStack);
+        if (birthWeaponSlot == first) {
+            birthWeaponSlot = second;
+        } else if (birthWeaponSlot == second) {
+            birthWeaponSlot = first;
+        }
     }
 
     public ItemStack exchange(int slot, ItemStack source) {
@@ -103,7 +115,44 @@ public final class MobInventory {
             throw new IllegalArgumentException("交换来源超过该物品最大堆叠数");
         }
         ItemStack previous = slots.set(index, source.copyAndClear());
+        if (birthWeaponSlot == slot) {
+            birthWeaponSlot = NO_WEAPON;
+        }
         return previous;
+    }
+
+    /** 只占手边空槽，落袋成功才消费兵器并登记其装备掉率。 */
+    public boolean insertBirthWeapon(ItemStack source) {
+        validateBirthWeapon(source);
+        if (birthWeaponSlot != NO_WEAPON) {
+            throw new IllegalStateException("背囊已有出生兵器");
+        }
+        for (int slot = 0; slot < ROW_SIZE; slot++) {
+            if (slots.get(slot).isEmpty()) {
+                insertAt(slot, source);
+                birthWeaponSlot = slot;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    Optional<Integer> birthWeaponSlot() {
+        if (birthWeaponSlot == NO_WEAPON) {
+            return Optional.empty();
+        }
+        return Optional.of(birthWeaponSlot);
+    }
+
+    void restoreBirthWeapon(int slot) {
+        validateBirthWeapon(slots.get(checkedSlot(slot)));
+        birthWeaponSlot = slot;
+    }
+
+    private static void validateBirthWeapon(ItemStack weapon) {
+        if (weapon.isEmpty() || weapon.getCount() != 1 || weapon.getMaxStackSize() != 1) {
+            throw new IllegalArgumentException("出生兵器必须是不可堆叠的单件物品");
+        }
     }
 
     static int checkedSlot(int slot) {

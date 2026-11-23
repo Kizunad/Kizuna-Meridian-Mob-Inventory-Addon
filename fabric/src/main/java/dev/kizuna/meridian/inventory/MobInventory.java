@@ -137,6 +137,10 @@ public final class MobInventory {
         return false;
     }
 
+    public boolean isBirthWeapon(int slot) {
+        return birthWeaponSlot == checkedSlot(slot);
+    }
+
     Optional<Integer> birthWeaponSlot() {
         if (birthWeaponSlot == NO_WEAPON) {
             return Optional.empty();
@@ -144,7 +148,7 @@ public final class MobInventory {
         return Optional.of(birthWeaponSlot);
     }
 
-    void restoreBirthWeapon(int slot) {
+    public void restoreBirthWeapon(int slot) {
         validateBirthWeapon(slots.get(checkedSlot(slot)));
         birthWeaponSlot = slot;
     }

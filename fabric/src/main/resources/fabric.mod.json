@@ -3,6 +3,13 @@
   "id": "meridian_mob_inventory",
   "version": "${version}",
   "name": "Kizuna Meridian Mob Inventory Addon",
+  "description": "Gives ordinary skeletons a persistent pack with eighteen inventory slots.\n普通骷髅带有十八格背囊，囊内物品随骷髅一起保存。",
+  "contact": {
+    "homepage": "https://github.com/Kizunad/Kizuna-Meridian-Mob-Inventory-Addon",
+    "sources": "https://github.com/Kizunad/Kizuna-Meridian-Mob-Inventory-Addon",
+    "issues": "https://github.com/Kizunad/Kizuna-Meridian-Mob-Inventory-Addon/issues"
+  },
+  "icon": "assets/meridian_mob_inventory/icon.png",
   "environment": "*",
   "authors": ["Kizunad"],
   "license": "PolyForm-Noncommercial-1.0.0",
@@ -13,7 +20,7 @@
     "minecraft": "26.2",
     "fabricloader": ">=0.20.1",
     "fabric-api": ">=0.161.0+26.2",
-    "meridian_framework": "0.1.0-SNAPSHOT",
-    "bs3d_weights_addon": "0.1.0-SNAPSHOT"
+    "meridian_framework": "0.1.0",
+    "bs3d_weights_addon": "0.1.0"
   }
 }

@@ -45,7 +45,7 @@ public final class InventoryCommandsGameTest {
 
     @GameTest(maxTicks = InventoryTestSupport.TIMEOUT)
     public void selectorsAndActionsCompleteAndUnregisteredEntitiesAreRejected(GameTestHelper context) {
-        // Tab 走 Brigadier 原版路径；未登记生物与骷髅变种都必须拒绝。
+        // Tab 走 Brigadier 原版路径；未登记的动物与爬行怪都必须拒绝。
         Skeleton skeleton = InventoryTestSupport.spawn(context);
         CommandSourceStack source = context.getLevel().getServer().createCommandSourceStack();
         context.assertTrue(completions(source, "meridian debug ").contains("inventory"), "缺少 inventory 补全");
@@ -54,8 +54,8 @@ public final class InventoryCommandsGameTest {
         context.assertTrue(completions(source, ROOT + skeleton.getStringUUID() + " ")
                 .containsAll(List.of("list", "clear")), "动作未补全");
         Entity pig = context.spawn(EntityTypes.PIG, InventoryTestSupport.SPAWN);
-        Entity stray = context.spawn(EntityTypes.STRAY, InventoryTestSupport.SPAWN);
-        for (Entity entity : List.of(pig, stray)) {
+        Entity creeper = context.spawn(EntityTypes.CREEPER, InventoryTestSupport.SPAWN);
+        for (Entity entity : List.of(pig, creeper)) {
             context.assertTrue(run(source, ROOT + entity.getStringUUID() + " list") == 0,
                     "未登记实体 list 没有拒绝：" + entity.getType());
             context.assertTrue(run(source, ROOT + entity.getStringUUID() + " clear") == 0,

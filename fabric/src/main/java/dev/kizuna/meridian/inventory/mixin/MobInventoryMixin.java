@@ -1,12 +1,20 @@
 package dev.kizuna.meridian.inventory.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.kizuna.meridian.inventory.InventoryHolder;
 import dev.kizuna.meridian.inventory.InventoryState;
 import dev.kizuna.meridian.inventory.MobInventories;
 import dev.kizuna.meridian.inventory.MobBurden;
 import dev.kizuna.meridian.inventory.PickupGoal;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import dev.kizuna.meridian.inventory.GroundItemAccess;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -29,16 +37,54 @@ public abstract class MobInventoryMixin implements InventoryHolder {
         }
     }
 
-    @ModifyExpressionValue(method = "aiStep", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Mob;canPickUpLoot()Z"))
-    private boolean meridian$vanillaLooting(boolean vanilla) {
-        return vanilla && !MobInventories.usesSkeletonSupplies((Mob) (Object) this);
+    @Unique
+    private static final TagKey<Item> MERIDIAN_POCKET_MONEY = TagKey.create(Registries.ITEM,
+            Identifier.parse("meridian_mob_inventory:pocket_money"));
+
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/Mob;wantsToPickUp(Lnet/minecraft/server/level/ServerLevel;"
+                    + "Lnet/minecraft/world/item/ItemStack;)Z"))
+    private boolean meridian$wantsGroundItem(Mob mob, ServerLevel level, ItemStack stack, Operation<Boolean> original) {
+        if (stack.is(MERIDIAN_POCKET_MONEY) && MobInventories.supports(mob)) {
+            return MobInventories.state(mob).available();
+        }
+        return !MobInventories.usesSkeletonSupplies(mob) && original.call(mob, level, stack);
+    }
+
+    @WrapOperation(method = "aiStep", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/Mob;pickUpItem(Lnet/minecraft/server/level/ServerLevel;"
+                    + "Lnet/minecraft/world/entity/item/ItemEntity;)V"))
+    private void meridian$pocketMoney(Mob mob, ServerLevel level, ItemEntity item, Operation<Void> original) {
+        var ground = item.getItem();
+        if (!ground.is(MERIDIAN_POCKET_MONEY) || !MobInventories.supports(mob)) {
+            original.call(mob, level, item);
+            return;
+        }
+        var source = (GroundItemAccess) item;
+        if (source.meridian$reserved()) {
+            return;
+        }
+        var remainder = ground.copy();
+        int count = MobInventories.inventory(mob).insert(remainder);
+        if (count > 0) {
+            mob.onItemPickup(item);
+            mob.take(item, count);
+            if (source.meridian$isPlayerDrop()) {
+                mob.setPersistenceRequired();
+            }
+            if (remainder.isEmpty()) {
+                item.discard();
+            } else {
+                item.setItem(remainder);
+            }
+        }
     }
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void meridian$refreshSpeed(CallbackInfo callback) {
         Mob mob = (Mob) (Object) this;
         if (MobInventories.supports(mob) && mob.level() instanceof ServerLevel level) {
+            meridianInventoryState().observe(mob);
             MobBurden.tick(level, mob);
         }
     }

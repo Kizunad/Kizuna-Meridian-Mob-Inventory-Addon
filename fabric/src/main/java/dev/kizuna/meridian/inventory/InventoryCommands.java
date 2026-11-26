@@ -57,7 +57,7 @@ final class InventoryCommands {
     private static int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         // 只列有东西的格子；空背囊单独说一句，不刷十八行空格子。
         Mob mob = target(context);
-        MobInventory inventory = MobInventories.inventory(mob);
+        MobInventory inventory = MobInventories.open(mob);
         List<Component> lines = new ArrayList<>();
         for (int slot = 0; slot < MobInventory.SIZE; slot++) {
             ItemStack stack = inventory.peek(slot);
@@ -84,7 +84,7 @@ final class InventoryCommands {
     private static int clear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         // 清空是明确的管理删除，仍经移出接口执行，不触碰装备或出生标记。
         Mob mob = target(context);
-        MobInventory inventory = MobInventories.inventory(mob);
+        MobInventory inventory = MobInventories.open(mob);
         int removed = 0;
         for (int slot = 0; slot < MobInventory.SIZE; slot++) {
             removed += inventory.extract(slot, Integer.MAX_VALUE).getCount();

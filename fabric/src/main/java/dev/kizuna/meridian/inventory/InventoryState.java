@@ -23,6 +23,15 @@ public final class InventoryState {
     private String diagnostic;
     private boolean invalidWeightReported;
 
+    private boolean observed;
+
+    public void observe(Mob mob) {
+        if (!observed && available()) {
+            MobInventories.notifyOpen(mob);
+            observed = true;
+        }
+    }
+
     public boolean available() {
         return damagedData == null && phase == InventoryStorage.Phase.READY;
     }
@@ -40,6 +49,7 @@ public final class InventoryState {
 
     void spillOnConversion(Mob mob, ServerLevel level) {
         if (available()) {
+            observe(mob);
             for (int slot = 0; slot < MobInventory.SIZE; slot++) {
                 ItemStack stack = inventory.extract(slot, Integer.MAX_VALUE);
                 if (!stack.isEmpty()) {
@@ -64,6 +74,7 @@ public final class InventoryState {
 
     public void load(Mob mob, ValueInput input) {
         // PASSTHROUGH 保留错误类型和未知字段，避免普通可选解码把坏条目吞掉。
+        observed = false;
         Optional<Dynamic<?>> raw = input.read(InventoryStorage.KEY, Codec.PASSTHROUGH);
         if (raw.isEmpty()) {
             inventory = new MobInventory();
@@ -125,6 +136,7 @@ public final class InventoryState {
         if (damagedData != null || phase == InventoryStorage.Phase.DEAD) {
             return;
         }
+        observe(mob);
         phase = InventoryStorage.Phase.DEAD;
         inventory.birthWeaponSlot().ifPresent(slot -> {
             ItemStack weapon = inventory.extract(slot, 1);

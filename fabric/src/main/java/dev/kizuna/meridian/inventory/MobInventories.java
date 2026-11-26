@@ -1,6 +1,9 @@
 package dev.kizuna.meridian.inventory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -12,7 +15,25 @@ public final class MobInventories {
     private static final Set<EntityType<?>> TYPES = Set.of(EntityTypes.SKELETON, EntityTypes.VILLAGER,
             EntityTypes.WANDERING_TRADER, EntityTypes.PILLAGER, EntityTypes.VINDICATOR, EntityTypes.EVOKER,
             EntityTypes.WITCH, EntityTypes.ILLUSIONER, EntityTypes.ZOMBIE, EntityTypes.HUSK, EntityTypes.DROWNED,
-            EntityTypes.ZOMBIE_VILLAGER);
+            EntityTypes.ZOMBIE_VILLAGER, EntityTypes.PIGLIN, EntityTypes.PIGLIN_BRUTE, EntityTypes.ZOMBIFIED_PIGLIN,
+            EntityTypes.STRAY, EntityTypes.BOGGED, EntityTypes.PARCHED, EntityTypes.WITHER_SKELETON);
+
+    private static final List<Consumer<Mob>> openingListeners = new ArrayList<>();
+
+    public static void onFirstOpen(Consumer<Mob> listener) {
+        openingListeners.add(listener);
+    }
+
+    static void notifyOpen(Mob mob) {
+        openingListeners.forEach(listener -> listener.accept(mob));
+    }
+
+    public static MobInventory open(Mob mob) {
+        // 交易或查看背囊时，先完成读档后的首次发放。
+        var state = state(mob);
+        state.observe(mob);
+        return state.inventory();
+    }
 
     private MobInventories() {
         // 查询入口没有全局实体缓存，生命周期随实体本身。
